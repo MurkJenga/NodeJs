@@ -1,2 +1,4 @@
 # Ignore files related to Environmental variables
 .env
+
+# Ignore config for bot
