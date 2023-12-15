@@ -13,6 +13,6 @@ module.exports = {
         };
  
         await interaction.reply({ embeds: [embed], ephemeral: false }); 
-        console.log(interaction);
+        //console.log(interaction);
     },
 };

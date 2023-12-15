@@ -1,9 +1,12 @@
+const { insert_message, deactive_message, update_message } = require('./custom_functions/database_functions.js');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent] });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
@@ -27,6 +30,25 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
+client.on('raw', packet => { 
+	const { d: data } = packet;
+    switch (packet.t) {
+        case 'MESSAGE_DELETE':
+			deactive_message(data.id, data.channel_id, data.guild_id) 
+			break
+        case 'MESSAGE_UPDATE':
+			update_message(data.timestamp, data.id, data.content, data.channel_id, data.author.id, data.guild_id)
+			break
+        case 'MESSAGE_CREATE': 
+            insert_message(data.channel_id, data.guild_id, data.id, data.timestamp, data.content, data.author.id); 
+			//Object.keys(data).forEach((prop)=> console.log(prop))
+            break;
+        default:
+            console.log(data.id);
+            break;
+    }
+});
+
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
@@ -35,7 +57,6 @@ client.on(Events.InteractionCreate, async interaction => {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
 	}
-
 	try {
 		await command.execute(interaction);
 	} catch (error) {
