@@ -41,7 +41,7 @@ client.on('raw', packet => {
 			break
         case 'MESSAGE_CREATE': 
             insert_message(data.channel_id, data.guild_id, data.id, data.timestamp, data.content, data.author.id); 
-			//Object.keys(data).forEach((prop)=> console.log(prop))
+			//Object.keys(data).forEach((prop)=> console.log(prop)) 
             break;
         default:
             console.log(data.id);
