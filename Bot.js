@@ -1,8 +1,8 @@
 const { insert_message, deactive_message, update_message } = require('./custom_functions/database_functions.js');
-const fs = require('node:fs');
-const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
