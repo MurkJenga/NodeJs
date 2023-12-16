@@ -2,11 +2,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
-const { deactive_message, update_message, insert_message } = require('./custom_functions/database_functions.js');
+const { deactive_message, update_message, insert_message, remove_reaction, add_reaction} = require('./custom_functions/database_functions.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: [
+	GatewayIntentBits.GuildEmojisAndStickers, 
+	GatewayIntentBits.GuildMembers,
+	GatewayIntentBits.GuildMessageReactions,
+	GatewayIntentBits.GuildMessageTyping,
+	GatewayIntentBits.GuildMessages, 
+	GatewayIntentBits.Guilds,
+	GatewayIntentBits.MessageContent
+] });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
@@ -30,6 +36,7 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 client.on('raw', packet => { 
+	//console.log(`switch: ${packet.t}`)
 	const { d: data } = packet;
     switch (packet.t) {
         case 'MESSAGE_DELETE':
@@ -38,12 +45,17 @@ client.on('raw', packet => {
         case 'MESSAGE_UPDATE':
 			update_message(data.timestamp, data.id, data.content, data.channel_id, data.author.id, data.guild_id)
 			break
-        case 'MESSAGE_CREATE': 
-            insert_message(data.channel_id, data.guild_id, data.id, data.timestamp, data.content, data.author.id); 
-			//Object.keys(data).forEach((prop)=> console.log(prop)) 
+		case 'MESSAGE_CREATE': 
+            insert_message(data.channel_id, data.guild_id, data.id, data.timestamp, data.content, data.author.id);  
             break;
-        default:
-            console.log(data.id);
+		case 'MESSAGE_REACTION_REMOVE': 
+			remove_reaction(data.user_id, data.message_id, data.emoji.name, data.emoji.id, data.channel_id, data.guild_id)			
+            break;
+		case 'MESSAGE_REACTION_ADD': 
+			add_reaction(data.user_id, data.message_id, data.emoji.name, data.channel_id, data.guild_id)			
+			//Object.keys(data).forEach((prop)=> console.log(prop))   
+			break;
+        default: 
             break;
     }
 });
@@ -66,6 +78,46 @@ client.on(Events.InteractionCreate, async interaction => {
 			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		}
 	}
-});
+}); 
 
-client.login(token);
+async function fetchAllMessages(channel) {
+    let allMessages = [];
+    let lastMessageId;
+
+    do {
+        // Fetch messages page by page
+        const messages = await channel.messages.fetch({ limit: 100, before: lastMessageId });
+
+        // Check if there are more messages
+        if (messages.size > 0) {
+            // Update lastMessageId for the next iteration
+            lastMessageId = messages.last().id;
+
+            // Concatenate the messages to the array
+            allMessages = allMessages.concat(Array.from(messages.values()));
+        } else {
+            // No more messages, exit the loop
+            break;
+        }
+    } while (true);
+
+    return allMessages;
+}
+
+client.on('messageCreate', async (message) => {
+    if (message.content === '!fetchAllMessages') {
+        try {
+            const channel = message.channel;
+            const allMessages = await fetchAllMessages(channel);
+
+            // Now allMessages contains an array of all messages in the channel
+			//allMessages.forEach((element) => console.log(element.channelId, element.guildId, element.id, element.createdTimestamp, element.content, element.author.id))
+			console.log(`Fetched ${allMessages.length} messages.`);
+			allMessages.forEach((element) => console.log(element))
+		} catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    }
+}); 
+
+client.login(token);	
