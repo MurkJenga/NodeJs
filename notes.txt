@@ -1,0 +1,32 @@
+Text Channel:
+
+Type: GUILD_TEXT
+Integer Value: 0
+DM Channel (Direct Message):
+
+Type: DM
+Integer Value: 1
+Voice Channel:
+
+Type: GUILD_VOICE
+Integer Value: 2
+Group DM Channel (Group Direct Message):
+
+Type: GROUP_DM
+Integer Value: 3
+Category Channel:
+
+Type: GUILD_CATEGORY
+Integer Value: 4
+News Channel:
+
+Type: GUILD_NEWS
+Integer Value: 5
+Store Channel:
+
+Type: GUILD_STORE
+Integer Value: 6
+Unknown Channel Type:
+
+Type: UNKNOWN
+Integer Value: 7
