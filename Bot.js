@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
-const { deactive_message, update_message, insert_message, remove_reaction, add_reaction} = require('./custom_functions/database_functions.js');
+const { deactive_message, update_message, insert_message, remove_reaction, add_reaction} = require('./custom_functions/databaseFunctions.js');
 
 const client = new Client({ intents: [
 	GatewayIntentBits.GuildEmojisAndStickers, 
@@ -31,10 +31,6 @@ for (const folder of commandFolders) {
 	}
 }
 
-client.once(Events.ClientReady, readyClient => {
-	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-});
-
 client.on('raw', packet => { 
 	//console.log(`switch: ${packet.t}`)
 	const { d: data } = packet;
@@ -52,11 +48,11 @@ client.on('raw', packet => {
 			remove_reaction(data.user_id, data.message_id, data.emoji.name, data.emoji.id, data.channel_id, data.guild_id)			
             break;
 		case 'MESSAGE_REACTION_ADD': 
-			add_reaction(data.user_id, data.message_id, data.emoji.name, data.channel_id, data.guild_id)			
-			//Object.keys(data).forEach((prop)=> console.log(prop))   
+			add_reaction(data.user_id, data.message_id, data.emoji.name, data.emoji.id, data.channel_id, data.guild_id)			
+			//Object.keys(data.emoji).forEach((prop)=> console.log(prop))   
 			break;
         default: 
-            break;
+            break; //userId, messageId, emojiName, emojiId, channelId, guildId
     }
 });
 
@@ -113,11 +109,15 @@ client.on('messageCreate', async (message) => {
             // Now allMessages contains an array of all messages in the channel
 			//allMessages.forEach((element) => console.log(element.channelId, element.guildId, element.id, element.createdTimestamp, element.content, element.author.id))
 			console.log(`Fetched ${allMessages.length} messages.`);
-			allMessages.forEach((element) => console.log(element))
+			//allMessages.forEach((element) => console.log(element))
 		} catch (error) {
             console.error('Error fetching messages:', error);
         }
     }
 }); 
+
+client.once(Events.ClientReady, readyClient => {
+	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
 
 client.login(token);	
