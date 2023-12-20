@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const {insert_channel} = require('../../custom_functions/databaseFunctions') 
+const { insert_channel } = require('../../custom_functions/databaseFunctions') 
 const { formatDatetime } = require('../../custom_functions/getFormattedDatetime')
 
 module.exports = {
