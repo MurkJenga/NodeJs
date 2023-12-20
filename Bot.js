@@ -3,6 +3,7 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const { deactive_message, update_message, insert_message, remove_reaction, add_reaction} = require('./custom_functions/databaseFunctions.js');
+const { createdEmbed, randomReply } = require('./custom_functions/miscFunctions.js')
 
 const client = new Client({ intents: [
 	GatewayIntentBits.GuildEmojisAndStickers, 
@@ -59,7 +60,6 @@ client.on('raw', packet => {
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = interaction.client.commands.get(interaction.commandName);
-
 	if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
@@ -96,7 +96,6 @@ async function fetchAllMessages(channel) {
             break;
         }
     } while (true);
-
     return allMessages;
 }
 
@@ -109,15 +108,19 @@ client.on('messageCreate', async (message) => {
             // Now allMessages contains an array of all messages in the channel
 			//allMessages.forEach((element) => console.log(element.channelId, element.guildId, element.id, element.createdTimestamp, element.content, element.author.id))
 			console.log(`Fetched ${allMessages.length} messages.`);
-			//allMessages.forEach((element) => console.log(element))
 		} catch (error) {
             console.error('Error fetching messages:', error);
         }
     }
+
+    if (message.content.toLowerCase().includes('peter') && message.content.toLowerCase().includes('mom')) {
+		message.react('👋')
+		message.reply({ embeds: [createdEmbed('682352', randomReply() )] } )
+	}
 }); 
 
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-client.login(token);	
+client.login(token);	 

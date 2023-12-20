@@ -1,7 +1,5 @@
 To do:
 
 - Load all messages
-- Peters mom
 - SQL queries
-- Plex
-- Help
+- Plex 
