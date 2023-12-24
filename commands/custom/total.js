@@ -21,12 +21,13 @@ const query = `
         ROW_NUMBER() OVER ( ORDER BY count(m.message_id) desc ), ". ",
         u.username, ": ",
         count(m.message_id) 
-        ) stats
+        ) stats,
+        count(*)
     from user u 
     left join message m on m.author_id = u.user_id
     where u.isBot = 0
     group by u.username
-    order by 1 asc
+    order by 2 desc
     `
 
 module.exports = {
