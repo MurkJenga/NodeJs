@@ -8,4 +8,8 @@ function formatDatetime(datetime) {
     return DateTime.fromMillis(datetime).toFormat('yyyy/MM/dd HH:mm:ss')
 } 
 
-module.exports = { getFormattedDatetime, formatDatetime };
+function formatDate(datetime) {
+    return DateTime.fromISO(datetime).toFormat('yyyy/MM/dd')
+} 
+
+module.exports = { getFormattedDatetime, formatDatetime, formatDate };

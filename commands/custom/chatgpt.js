@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
-const axios = require('axios');
-const chatgpt_key = require('../../config.json');
+const axios = require('axios'); 
 require('dotenv').config(); 
+const { createdEmbed } = require('../../custom_functions/miscFunctions.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -41,11 +41,11 @@ module.exports = {
             const chatGPTResponse = response.data.choices[0].message.content; 
             
             const embed = {
-                color: parseInt('8f9e8a', 16),
-                title: 'ChatGPT Says:',
+                color: parseInt('fc6703', 16),
+                title: `ChatGPT was asked: ${question}`,
                 description: chatGPTResponse
             }
-            await interaction.followUp({ embeds: [embed], ephemeral: false });
+            await interaction.followUp({ embeds: [createdEmbed('fc6703', `ChatGPT was asked: ${question}`, chatGPTResponse)], ephemeral: false })
 
         } catch (error) {
             console.error('Error processing ChatGPT question:', error);
