@@ -20,7 +20,7 @@ const query = `
     select concat(
         ROW_NUMBER() OVER ( ORDER BY count(m.message_id) desc ), ". ",
         u.username, ": ",
-        count(m.message_id) 
+        format(count(m.message_id), 0)
         ) stats,
         count(*)
     from user u 
