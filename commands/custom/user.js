@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const mysql = require('mysql2/promise');
 const { hostname, user, password, database } = require('../../config.json');
-const { executeQuery } = require('../../custom_functions/executeQuery.js')
 const { createdEmbed } = require('../../custom_functions/miscFunctions.js')
 const { getFormattedDatetime } = require('../../custom_functions/getFormattedDatetime.js')
  
@@ -16,6 +15,7 @@ const pool = mysql.createPool({
     connectionLimit: 15,
     queueLimit: 5
 });  
+
 query = `
     with totalMessages as (
         select count(*) totalMsgs, u.user_id
@@ -74,7 +74,7 @@ query = `
     topReact as (
         select 
             u.user_id,
-            max(r.emoji_txt) as topReact
+            max(coalesce(concat("<",r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt) ) as topReact
         from user u
         join reaction r on r.user_id = u.user_id
         group by 1
@@ -83,10 +83,10 @@ query = `
     select 
         u.user_id,
         username,
-        date(join_dtm) joinDate,
+        coalesce(DATE_FORMAT(join_dtm, "%m-%d-%Y"), 'N/A'  ) joinDate,
         coalesce(totMsgs.totalMsgs, 0) totalMsgs,
         round(coalesce(averageWrds, 0),0) averageWrds,
-        coalesce(lastMsg.lastMsg, 'N/A') lastMsg,
+        coalesce(DATE_FORMAT(lastMsg.lastMsg, "%m-%d-%Y"), 'N/A') lastMsg,
         coalesce(totWrds.totalWrds, 0) totalWrds,
         round(coalesce(perDay.avgPerDay, 0),0) avgPerDay,
         coalesce(rGiv.reactGiv, 0) reactGiv,
@@ -110,32 +110,32 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('user')
 		.setDescription('Returns user stats based on user passed')
-        .addUserOption(option => option.setName('target').setDescription('to show the targeted user\'s tag')),
+        .addUserOption(option => option.setName('user').setDescription('to show the targeted user\'s tag').setRequired(true)),
 
     async execute(interaction) { 
         try { 
-            const user = interaction.options.getUser('target')  
+            const user = interaction.options.getUser('user')  
             const [rows, fields] = await  pool.execute(query, [user.id]);  
             console.log(`Returned ${rows.length} row(s) @ ${cstDatetime} using the /User command`);
             
-            const userStats = rows[0]; // Access the first row 
-            console.log(userStats)
-
-            const exampleEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF)
-                    .setTitle(user.username) 
-                    .setDescription('King Jenga')
-                    .setThumbnail('https://i.imgur.com/AfFp7pu.png') 
-                    .setImage('https://i.imgur.com/AfFp7pu.png')
-                    .addFields(
-                        { name: 'Total Words', value: user.totalWrds },
-                        { name: '\u200B', value: '\u200B' },
-                        { name: 'Inline field title', value: 'Some value here', inline: true },
-                        { name: 'Inline field title', value: 'Some value here', inline: true },
-                    )
-                    .setTimestamp()
-                    .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
-            await interaction.reply({ embeds: [exampleEmbed], ephemeral: false });
+            const userStats = rows[0]; // Access the first row  
+            const embed = new EmbedBuilder()
+                .setColor('fcf003')
+                .setTitle(`${userStats.username}'s stats`)  
+                .setDescription('Moms Basement Stats Below') 
+                .addFields(
+                    { name: 'Join Date', value: userStats.joinDate, inline: true}, 
+                    { name: 'Total Messages', value: String(userStats.totalMsgs), inline: true },
+                    { name: 'Avg Words Per Message', value: userStats.averageWrds, inline: true },
+                    { name: 'Last Message Sent', value: userStats.lastMsg, inline: true },
+                    { name: 'Total Words', value: userStats.totalWrds, inline: true },
+                    { name: 'Average Messages Per Day', value: userStats.avgPerDay, inline: true },
+                    { name: 'Emojis Given', value: String(userStats.reactGiv), inline: true },
+                    { name: 'Emojis Recieved', value: String(userStats.reactRec), inline: true },
+                    { name: 'Top Emoji Used', value: userStats.topReact, inline: true },
+                ) 
+                
+            await interaction.reply({ embeds: [embed], ephemeral: false });
 
         } catch (error) {
             await interaction.reply({ embeds: [createdEmbed('FF0000', 'This didnt work', '')], ephemeral: false });

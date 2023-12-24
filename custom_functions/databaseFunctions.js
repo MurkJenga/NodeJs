@@ -93,4 +93,15 @@ async function insert_user(user_id, username, join_dtm, nickname, isBot) {
     }
 }
 
-module.exports = { insert_message, deactive_message, update_message, remove_reaction, add_reaction, insert_channel, insert_user };
+async function insert_request(type, request_text) {  
+    try {
+        const sql = 'INSERT INTO request (type, request_txt, request_dte) VALUES ( ?, ?, ?)';
+        const values = [type, request_text, cstDatetime];
+        const rows = await executeQuery(sql, values);
+        console.log(`Inserted ${rows.affectedRows} request(s) @ ${cstDatetime}`);
+    } catch (error) {
+        console.error('Error inserting data into MySQL:', error);
+    }
+}
+
+module.exports = { insert_request, insert_message, deactive_message, update_message, remove_reaction, add_reaction, insert_channel, insert_user };
