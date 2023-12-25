@@ -37,7 +37,7 @@ async function deactive_message(messageId, channelId, guildId) {
     }   
 }
 
-async function update_message(updated_time, messageId, content, channelId, authorId, guildId) {
+async function update_message(updated_time, messageId, content, channelId, guildId) { //, authorId
     try {
         const sql = 'update message set last_modified_dtm = ?, content_txt = ? where message_id = ?'
         const values = [cstDatetime, content, messageId]
@@ -46,7 +46,7 @@ async function update_message(updated_time, messageId, content, channelId, autho
     } catch (error) {
         console.error('Error inserting data into MySQL:', error);
     }  
-    console.log(`${authorId} updated message ${messageId} to ${content} in ${channelId} channel`)
+    console.log(`Updated message ${messageId} to ${content} in ${channelId} channel`)
 } 
 
 async function remove_reaction(userId, messageId, emojiName, emojiId, channelId, guildId) {
