@@ -40,7 +40,7 @@ client.on('raw', packet => {
 			deactive_message(data.id, data.channel_id, data.guild_id) 
 			break
         case 'MESSAGE_UPDATE':
-			update_message(data.timestamp, data.id, data.content, data.channel_id, data.author.id, data.guild_id)
+			update_message(data.timestamp, data.id, data.content, data.channel_id, data.guild_id) //, data.author.id
 			break
 		case 'MESSAGE_CREATE': 
             insert_message(data.channel_id, data.guild_id, data.id, data.timestamp, data.content, data.author.id);  
