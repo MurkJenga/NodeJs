@@ -114,7 +114,7 @@ client.on('messageCreate', async (message) => {
     }
 
     if (message.content.toLowerCase().includes('peter') && message.content.toLowerCase().includes('mom')) {
-		message.react('👋')
+		message.react('<:penis:285904916742930432>')
 		message.reply({ embeds: [createdEmbed('682352', randomReply() )] } )
 	}
 }); 
