@@ -41,7 +41,7 @@ module.exports = {
             console.log(`Returned ${rows.length} row(s) @ ${cstDatetime} using the /User command`);
              
             const data =  rows.map(row => row.stats).join('\n')
-            console.log(data) 
+            //console.log(data) 
                 
             await interaction.reply({ embeds: [createdEmbed('8c03fc', `Total Messages per User`, data)], ephemeral: false })
 

@@ -1,20 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const mysql = require('mysql2/promise');
-const { hostname, user, password, database } = require('../../config.json');
+const config = require('../../config.json');
 const { createdEmbed } = require('../../custom_functions/miscFunctions.js')
 const { getFormattedDatetime } = require('../../custom_functions/getFormattedDatetime.js')
  
 const cstDatetime = getFormattedDatetime()
 
-const pool = mysql.createPool({
-    host: hostname,
-    user: user,
-    password: password,
-    database: database,
-    waitForConnections: true,
-    connectionLimit: 15,
-    queueLimit: 5
-});  
+const pool = mysql.createPool(config.mysql);  
+
 
 query = `
     with totalMessages as (
@@ -74,10 +67,11 @@ query = `
     topReact as (
         select 
             u.user_id,
-            max(coalesce(concat("<",r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt) ) as topReact
+            (coalesce(concat("<", ":", r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt) ) as topReact,
+            count(*)
         from user u
         join reaction r on r.user_id = u.user_id
-        group by 1
+        group by 1, 2
         )
         
     select 
