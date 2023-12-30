@@ -36,7 +36,7 @@ module.exports = {
                 })); 
 
                 const formattedResults = results.map(result => `**${result.title}**: ${result.type}`).join('\n');
-                console.log(formattedResults);
+                //console.log(formattedResults);
                 await interaction.reply({ embeds: [createdEmbed('04d10e', `Content Matching: ${content}`, formattedResults)], ephemeral: false });
                 
             } else { 

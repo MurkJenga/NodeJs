@@ -1,17 +1,10 @@
 const mysql = require('mysql2/promise');
-const { hostname, user, password, database } = require('../config.json');
+const config = require('../config.json');
 const { getFormattedDatetime } = require('./getFormattedDatetime.js')
 const { executeQuery } = require('../custom_functions/executeQuery.js')
 
-const pool = mysql.createPool({
-    host: hostname,
-    user: user,
-    password: password,
-    database: database,
-    waitForConnections: true,
-    connectionLimit: 15,
-    queueLimit: 5
-});  
+const pool = mysql.createPool(config.mysql);  
+
 const cstDatetime = getFormattedDatetime()
 
 // When a new message is created, insert message

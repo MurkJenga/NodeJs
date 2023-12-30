@@ -1,15 +1,8 @@
-const { hostname, user, password, database } = require('../config.json');
+const config = require('../config.json');
 const mysql = require('mysql2/promise');
 
-const pool = mysql.createPool({
-    host: hostname,
-    user: user,
-    password: password,
-    database: database,
-    waitForConnections: true,
-    connectionLimit: 15,
-    queueLimit: 5
-});  
+const pool = mysql.createPool(config.mysql);  
+ 
 
 async function executeQuery(sql, values) {
     try {

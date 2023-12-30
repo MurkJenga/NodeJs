@@ -1,5 +1,0 @@
-To do:
-
-- Load all messages
-- SQL queries
-- Plex 
