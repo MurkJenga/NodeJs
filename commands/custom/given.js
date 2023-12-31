@@ -38,7 +38,7 @@ module.exports = {
         
         if (rows[0]) {
             const data =  rows.map(row => row.stats).join('\n')  
-            await interaction.reply({ embeds: [createdEmbed('a33600', `Total Emojis Recieved For: ${emoji}`, String(data))], ephemeral: false })
+            await interaction.reply({ embeds: [createdEmbed('a33600', `Total Emojis Given For: ${emoji}`, String(data))], ephemeral: false })
 
         } else {
             const embed = new EmbedBuilder()
