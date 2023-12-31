@@ -4,7 +4,7 @@ const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const { deactive_message, update_message, insert_message, remove_reaction, add_reaction} = require('./custom_functions/databaseFunctions.js');
 const { createdEmbed, randomReply} = require('./custom_functions/miscFunctions.js')
-const { getFormattedDatetime } = require('./custom_functions/getFormattedDatetime.js')
+const { getFormattedDatetime, formatCSTTime } = require('./custom_functions/getFormattedDatetime.js')
 
 const client = new Client({ intents: [
 	GatewayIntentBits.GuildEmojisAndStickers, 
@@ -68,35 +68,32 @@ client.on('messageCreate', async (message) => {
 		message.react('<:penis:285904916742930432>')
 		message.reply({ embeds: [createdEmbed('682352', randomReply() )] } )
 	}  
- 
-	const dateObject = new Date(message.createdAt); 
-	const cstOffset = -6 * 60; 
+	console.log(`${message.author.username} created a message @ ${formatCSTTime(message.createdAt)}`)
 
-	dateObject.setMinutes(dateObject.getMinutes() + cstOffset);
-	const formattedDateTime = dateObject.toISOString().replace(/T/, ' ').replace(/\..+/, '');
-
-	insert_message(message.channelId, message.guildId, message.id, formattedDateTime, message.content, message.author.id)
+	insert_message(message.channelId, message.guildId, message.id, formatCSTTime(message.createdAt), message.content, message.author.id)
 	
 });  
 
 client.on('messageUpdate', (oldMessage, newMessage) => { 
 	const date = getFormattedDatetime() 
-	console.log(`${newMessage.author.username} updated a message from ${oldMessage.content} to ${newMessage.content}`)
-
-	update_message(date, newMessage.id, newMessage.content, newMessage.channelId, newMessage.guildId)
+	console.log(`${newMessage.author.username} updated a message from ${oldMessage.content} to ${newMessage.content} @ ${formatCSTTime(newMessage.editedAt)}`)
+	update_message(formatCSTTime(newMessage.editedAt), newMessage.id, newMessage.content, newMessage.channelId, newMessage.guildId)
 	
 });
 
 client.on('messageDelete', async (message) => {
+	console.log(`${message.author.username} deleted a message @ ${formatCSTTime(message.createdAt)}`)
 	deactive_message(message.id, message.channelId, message.guildId )
 });
 
 client.on('messageReactionAdd', (reaction, user) => {
-	add_reaction(user.id, reaction.message.id, reaction._emoji.name, reaction._emoji.id, reaction.message.channelId, reaction.message.guildId)
+	console.log(`${user.username} added a reaction @ ${getFormattedDatetime()}`)
+	add_reaction(user.id, reaction.message.id, reaction._emoji.name, reaction._emoji.id, reaction.message.channelId, reaction.message.guildId, getFormattedDatetime())
 });
 
 client.on('messageReactionRemove', (reaction, user) => {
-	remove_reaction(user.id, reaction.message.id, reaction._emoji.name, reaction._emoji.id, reaction.message.channelId, reaction.message.guildId)
+	console.log(`${user.username} removed a reaction @ ${getFormattedDatetime()}`)
+	remove_reaction(user.id, reaction.message.id, reaction._emoji.name, reaction._emoji.id, reaction.message.channelId, reaction.message.guildId, getFormattedDatetime())
 });  
 
 client.once(Events.ClientReady, readyClient => {
