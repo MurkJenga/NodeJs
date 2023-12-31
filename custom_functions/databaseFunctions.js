@@ -11,9 +11,9 @@ const cstDatetime = getFormattedDatetime()
 async function insert_message(channelId, guildId, messageId, createdTime, content, authorId) { 
     try {
         const sql = 'INSERT INTO message (channel_id, guild_id, message_id, created_dtm, content_txt, og_content_txt, author_id) VALUES (?, ?, ?, ?, ?, ?, ?)'
-        const values = [channelId, guildId, messageId, cstDatetime, content, content, authorId]
+        const values = [channelId, guildId, messageId, createdTime, content, content, authorId]
         const rows = await executeQuery(sql, values);
-        console.log(`Inserted ${rows.affectedRows} message(s) @ ${cstDatetime}`);
+        console.log(`Inserted ${rows.affectedRows} message(s) @ ${createdTime}`);
     } catch (error) {
         console.error('Error inserting data into MySQL:', error) 
     }

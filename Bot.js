@@ -68,10 +68,15 @@ client.on('messageCreate', async (message) => {
 		message.react('<:penis:285904916742930432>')
 		message.reply({ embeds: [createdEmbed('682352', randomReply() )] } )
 	}  
+ 
+	const dateObject = new Date(message.createdAt); 
+	const cstOffset = -6 * 60; 
 
-	const date = new Date(message.createdTimestamp); 
-	const formattedDate = date.toLocaleString('en-US', options); 
-	insert_message(message.channelId, message.guildId, message.id, formattedDate, message.content, message.author.id)
+	dateObject.setMinutes(dateObject.getMinutes() + cstOffset);
+	const formattedDateTime = dateObject.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+
+	insert_message(message.channelId, message.guildId, message.id, formattedDateTime, message.content, message.author.id)
+	
 });  
 
 client.on('messageUpdate', (oldMessage, newMessage) => { 
