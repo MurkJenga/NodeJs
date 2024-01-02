@@ -28,22 +28,26 @@ module.exports = {
             const emoji = interaction.options.getString('emoji')   
             const user = interaction.options.getUser('user')   
             const query = `
-                    select 
-                        concat(
-                            ROW_NUMBER() OVER ( ORDER BY count(m.message_id) desc ), ". ",
-                            u.username, ": ",
-                            format(count(m.message_id), 0)
-                            ) stats,
-                        u.username,
-                        count(*)
-                    from user u
-                    join reaction r on u.user_id = r.user_id
-                    join message m on m.message_id = r.message_id
-                    join user author on author.user_id = m.author_id
-                    where
-                    (coalesce(concat("<", ":", r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt)) = '${emoji}'
-                    and u.user_id = ${user.id}
-                    group by 2
+            select 
+                concat(
+                ROW_NUMBER() OVER ( ORDER BY count(m.message_id) desc ), ". ",
+                author.username, ": ",
+                format(count(m.message_id), 0)
+                ) stats, 
+                r.emoji_txt,
+                author.username as author,
+                count(*) as reactions
+            from user u
+            join reaction r on u.user_id = r.user_id
+            join message m on m.message_id = r.message_id
+            join user author on author.user_id = m.author_id
+            where
+                coalesce(concat("<", ":", r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt) = '${emoji}' and
+                u.user_id = ${user.id}
+            group by 
+                u.username,
+                r.emoji_txt,
+                author.username
                 `
             const [rows, fields] = await  pool.execute(query);  
             console.log(`Returned ${rows.length} row(s) @ ${cstDatetime} using the /User command`);
