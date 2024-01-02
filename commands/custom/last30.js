@@ -32,7 +32,7 @@ with last30Messages as (
             max(date(m.created_dtm)) as lastMsg,
             u.user_id
         from user u
-        join last30Messages m on m.author_id = u.user_id
+        join message m on m.author_id = u.user_id
         group by 2
         ),
     totalWrds as ( 
