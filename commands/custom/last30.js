@@ -10,17 +10,21 @@ const pool = mysql.createPool(config.mysql);
 
 
 const query = `
-    with totalMessages as (
+with last30Messages as (
+	select * from message where datediff(current_date, created_dtm)  <  31),
+	totalMessages as (
         select count(*) totalMsgs, u.user_id
         from user u
-        join message m on m.author_id = u.user_id
+        join last30Messages m on m.author_id = u.user_id
         group by u.user_id),
+	last30Reactions as (
+	select * from reaction where datediff(current_date, added_dtm)  <  31),
     avgWordsMsg as (
         select 
             sum((length(m.content_txt) - length(replace(m.content_txt,' ',''))) + 1) /count(m.message_id) as averageWrds,
             u.user_id
         from user u
-        join message m on m.author_id = u.user_id
+        join last30Messages m on m.author_id = u.user_id
         group by u.user_id	
         ),
     lastMessage as (
@@ -28,7 +32,7 @@ const query = `
             max(date(m.created_dtm)) as lastMsg,
             u.user_id
         from user u
-        join message m on m.author_id = u.user_id
+        join last30Messages m on m.author_id = u.user_id
         group by 2
         ),
     totalWrds as ( 
@@ -36,15 +40,15 @@ const query = `
             sum((length(m.content_txt) - length(replace(m.content_txt,' ',''))) + 1) totalWrds,
             u.user_id
         from user u
-        join message m on m.author_id = u.user_id
+        join last30Messages m on m.author_id = u.user_id
         group by u.user_id	 
         ),
     avgPerDay as (
         select 
-            count(m.message_id) / datediff(current_date(), date(u.join_dtm)) as avgPerDay,
+            count(m.message_id) / 30 as avgPerDay,
             u.user_id
         from user u
-        join message m on m.author_id = u.user_id
+        join last30Messages m on m.author_id = u.user_id
         group by u.user_id	 
         ),
     reactionGiven as (
@@ -52,7 +56,7 @@ const query = `
             u.user_id,
             count(*) as reactGiv
         from user u 
-        join reaction r on r.user_id = u.user_id and is_active = 1
+        join last30Reactions r on r.user_id = u.user_id and is_active = 1
         group by 1
         ),
     reactionRec as (
@@ -60,8 +64,8 @@ const query = `
             count(emoji_txt) reactRec,
             u.user_id
         from user u
-        join message m on m.author_id = u.user_id
-        join reaction r on r.message_id = m.message_id and r.user_id != m.author_id
+        join last30Messages m on m.author_id = u.user_id
+        join last30Reactions r on r.message_id = m.message_id and r.user_id != m.author_id
         group by 2
         ),
     topReact as (
@@ -71,7 +75,7 @@ const query = `
             count(*),
             ROW_NUMBER() OVER ( partition by u.user_id ORDER BY count(*) desc ) rowno
         from user u
-        join reaction r on r.user_id = u.user_id 
+        join last30Reactions r on r.user_id = u.user_id 
         group by 1, 2
         )
         
@@ -86,7 +90,7 @@ const query = `
         round(coalesce(perDay.avgPerDay, 0),0) avgPerDay,
         coalesce(rGiv.reactGiv, 0) reactGiv,
         coalesce(reactRec, 0) reactRec,
-        tReact.topReact
+        coalesce(tReact.topReact, 'N/A') as topReact
     from user u
     left join totalMessages totMsgs on totMsgs.user_id = u.user_id
     left join avgWordsMsg averg on averg.user_id = u.user_id
@@ -103,10 +107,9 @@ const query = `
         
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('user')
-		.setDescription('Returns user stats based on user passed')
+		.setName('last30')
+		.setDescription('Returns user stats based on user passed from the last 30 days')
         .addUserOption(option => option.setName('user').setDescription('to show the targeted user\'s tag').setRequired(true)),
-
     async execute(interaction) { 
         try { 
             const user = interaction.options.getUser('user')  
@@ -115,9 +118,9 @@ module.exports = {
             
             const userStats = rows[0]; // Access the first row  
             const embed = new EmbedBuilder()
-                .setColor('fcf003')
+                .setColor('6e34eb')
                 .setTitle(`${userStats.username}'s stats`)  
-                .setDescription('Moms Basement Stats Below') 
+                .setDescription('The stats for the last 30 days') 
                 .addFields(
                     { name: 'Join Date', value: userStats.joinDate, inline: true}, 
                     { name: 'Total Messages', value: String(userStats.totalMsgs), inline: true },
