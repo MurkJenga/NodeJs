@@ -6,4 +6,3 @@ config.json
 
 # Ignore docker file for bot
 docker-compose.yml
-dockerfile

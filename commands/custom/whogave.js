@@ -1,12 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
-const mysql = require('mysql2/promise');
-const config = require('../../config.json');
 const { createdEmbed } = require('../../custom_functions/miscFunctions.js')
-const { getFormattedDatetime } = require('../../custom_functions/getFormattedDatetime.js')
-
-const cstDatetime = getFormattedDatetime()
-
-const pool = mysql.createPool(config.mysql); 
+const { returnJsonResponse } = require('../../custom_functions/apiFunctions.js');
+const config = require('../../config.json')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -26,33 +21,15 @@ module.exports = {
     async execute(interaction) { 
         try { 
             const emoji = interaction.options.getString('emoji')   
-            const user = interaction.options.getUser('user')   
-            const query = `
-                    select 
-                    concat(
-                        ROW_NUMBER() OVER ( ORDER BY count(m.message_id) desc ), ". ",
-                        reactedUser.username, ": ",
-                        format(count(m.message_id), 0)
-                        ) stats,
-                    reactedUser.username,
-                    count(*)
-                    from user u
-                    join message m on m.author_id = u.user_id
-                    join reaction r on r.message_id = m.message_id
-                    join user reactedUser on reactedUser.user_id = r.user_id
-                    where
-                    (coalesce(concat("<", ":", r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt)) = '${emoji}'
-                    and u.user_id = ${user.id}
-                    group by 2
-                `
-            const [rows, fields] = await  pool.execute(query);  
-            console.log(`Returned ${rows.length} row(s) @ ${cstDatetime} using the /User command`);
-             
-            const data =  rows.map(row => row.stats).join('\n')
-            //console.log(data) 
-                
-            await interaction.reply({ embeds: [createdEmbed('ff5600', `Total times users have given ${emoji} to ${user.username}`, data)], ephemeral: false })
+            const user = interaction.options.getUser('user')
+            const jsonResponse = await returnJsonResponse(`${config.apiHost}/emoji/whogave/${user.id}/${emoji}`);
 
+            if (jsonResponse.length != 0) {
+                const data =  jsonResponse.map(row => row.stats).join('\n')
+                await interaction.reply({ embeds: [createdEmbed('ff5600', `Total times users have given ${emoji} to ${user.username}`, data)], ephemeral: false })
+            } else {
+                await interaction.reply({ embeds: [createdEmbed('612000', `${user.username} never got ${emoji} from anyone`)], ephemeral: false })
+            }
         } catch (error) {
             await interaction.reply({ embeds: [createdEmbed('FF0000', 'This didnt work', '')], ephemeral: false });
             console.error('Error reading data from MySQL:', error) 

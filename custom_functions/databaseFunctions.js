@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
 const config = require('../config.json');
-const { executeQuery } = require('../custom_functions/executeQuery.js')
+const { executeQuery } = require('../custom_functions/miscFunctions')
 
 const pool = mysql.createPool(config.mysql);   
 
@@ -27,9 +27,8 @@ async function deactive_message(messageId, channelId, guildId) {
     }   
 }
 
-async function update_message(updated_time, messageId, content, channelId, guildId) { //, authorId
+async function update_message(updated_time, messageId, content) { //, authorId
     try {
-        const sql = 'update message set last_modified_dtm = ?, content_txt = ? where message_id = ?'
         const values = [updated_time, content, messageId]
         const rows = await executeQuery(sql, values);
         //console.log(`Updated ${rows.affectedRows} message(s) @ ${cstDatetime}`);

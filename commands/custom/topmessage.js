@@ -1,25 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const mysql = require('mysql2/promise'); 
-const config = require('../../config.json'); 
-const { createdEmbed } = require('../../custom_functions/miscFunctions.js')
-
-const pool = mysql.createPool(config.mysql);  
-
-const query = 
-    `select  
-        count(r.emoji_txt) as totalReactions,
-        u.user_id,
-        u.username,
-        m.content_txt,  
-        concat('https://discord.com/channels/', m.guild_id, '/', m.channel_id, '/', m.message_id) as link
-    from message m
-    join reaction r on r.message_id = m.message_id
-    join user u on u.user_id = m.author_id
-    where u.user_id = ?
-    group by 2,3,4,5
-    order by 1 desc 
-    limit 1
-    `
+const { SlashCommandBuilder } = require('discord.js');
+const { returnJsonResponse } = require('../../custom_functions/apiFunctions.js');
+const { createdEmbed } = require('../../custom_functions/miscFunctions.js') 
+const config = require('../../config.json')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -31,9 +13,10 @@ module.exports = {
                 .setRequired(true)) 
 		.setDescription('Return the message that has the most reactions on it for a user'),
     async execute(interaction) { 
+        //localhost:3000/message/topmessage/553337834090659899 
         const user = interaction.options.getUser('user')  
-        const [rows, fields] = await  pool.execute(query, [user.id]);  
-        const data = rows[0]
+        const jsonResponse = await returnJsonResponse(`${config.apiHost}/message/topmessage/${user.id}`);
+        const data = jsonResponse[0]
         
         try {
             if (data.totalReactions > 0){
