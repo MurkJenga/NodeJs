@@ -1,29 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const mysql = require('mysql2/promise'); 
-const config = require('../../config.json'); 
-const { createdEmbed } = require('../../custom_functions/miscFunctions.js')
-
-const pool = mysql.createPool(config.mysql);  
-
-
-const query = 
-    `select 
-    concat(
-        ROW_NUMBER() OVER ( ORDER BY count(u.username) desc ), ". ",
-        u.username, ": ",
-        count(*) 
-        ) stats,
-    u.username,
-    r.emoji_txt,
-    r.emoji_id,
-    coalesce(concat("<", ":", r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt) emoji_identifier,
-    count(*) recieved
-    from user u
-    join message m on u.user_id = m.author_id
-    join reaction r on r.message_id = m.message_id
-    where  coalesce(concat("<", ":", r.emoji_txt, ":", emoji_id, ">"), r.emoji_txt) = ?
-    group by u.username, r.emoji_txt, r.emoji_id
-    `
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); 
+const { createdEmbed } = require('../../custom_functions/miscFunctions.js') 
+const { returnJsonResponse } = require('../../custom_functions/apiFunctions.js')
+const config = require('../../config.json')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -34,26 +12,16 @@ module.exports = {
                 .setRequired(true)
 				.setDescription('What emoji do you want to see stats for?'))
 		.setDescription('Return the total emojis recieved for the provided emoji'),
+
     async execute(interaction) { 
         const emoji = interaction.options.getString('emoji')        
-        const [rows, fields] = await  pool.execute(query, [emoji]);  
-        
-        if (rows[0]) {
-            const data =  rows.map(row => row.stats).join('\n') 
+        const jsonResponse = await returnJsonResponse(`${config.apiHost}/emoji/recieved/${emoji}`);
 
-            const embed = new EmbedBuilder()
-                .setColor('00a398')
-                .setTitle(`Total Emojis Recieved For: ${emoji}`)   
-                .setDescription(String(data))  
+        if (jsonResponse.length != 0) {
+            const data = jsonResponse.map(row => row.stats).join('\n');   
             await interaction.reply({ embeds: [createdEmbed('00a398', `Total Emojis Recieved For: ${emoji}`, String(data))], ephemeral: false })
-
-        } else {
-            const embed = new EmbedBuilder()
-                .setColor('1800a3')
-                .setTitle(`There have been no reactions for ${emoji}`)  
-                await interaction.reply({ embeds: [embed], ephemeral: false }); 
+        } else { 
+            await interaction.reply({ embeds: [createdEmbed('1800a3', `There have been no reactions for ${emoji}`)], ephemeral: false }); 
         }
-
-        
     }
 }
