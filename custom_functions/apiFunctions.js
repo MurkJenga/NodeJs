@@ -3,7 +3,11 @@ const config = require('../config.json')
 
 const returnJsonResponse = async (endpoint) => {
   try {
-    const response = await fetch(endpoint);
+    const response = await fetch(endpoint, {
+      headers: {
+        'x-api-key': config.botApiKey, 
+      },
+    });
     const jsonResponse = await response.json();
     return jsonResponse;
   } catch (error) {
@@ -16,7 +20,8 @@ const sendJsonRequest = (data, endpoint) => {
     fetch(`${config.apiHost}/${endpoint}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json' 
+            'Content-Type': 'application/json',
+            'x-api-key': config.botApiKey
         },
         body: JSON.stringify(data),  
     })   

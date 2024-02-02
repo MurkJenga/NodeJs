@@ -11,7 +11,7 @@ module.exports = {
 async execute(interaction) {
     try { 
 
-        const jsonResponse = await returnJsonResponse(`${config.apiHost}/message/total`); 
+        const jsonResponse = await returnJsonResponse(`${config.apiHost}/message/total`);
         const data = jsonResponse.map(row => row.stats).join('\n');
         
         interaction.reply({ embeds: [createdEmbed('8c03fc', 'Total Messages per User', data)], ephemeral: false });
