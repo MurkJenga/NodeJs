@@ -19,6 +19,11 @@ module.exports = {
                            - "whorecieved": Returns list of users and the times they gave an emoji to the specified user \n
                            - "topmessage": Returns the message that has the most emojis on it for a given user \n
                            - "last30": Shows stats from the last 30 days
+
+
+                           Below are the new updates made as of 2/12\n
+                           NEW COMMANDS: \n
+                           - "plexrecent": Returns list of movies added based on the days requested. Returns audience rating and date added.   
                            `
 
           await interaction.reply({ embeds: [createdEmbed('ffffff', `New Updates!`, explain)], ephemeral: false })
