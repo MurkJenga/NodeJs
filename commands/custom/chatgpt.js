@@ -24,7 +24,7 @@ module.exports = {
                 chatGPTApiEndpoint,
                 {
                     model: 'gpt-3.5-turbo-0613',   
-                    max_tokens: 150,
+                    max_tokens: 2000,
                     messages: [
                         { role: 'user', content: question },
                     ],
