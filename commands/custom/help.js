@@ -20,11 +20,14 @@ module.exports = {
                            - "topmessage": Returns the message that has the most emojis on it for a given user \n
                            - "last30": Shows stats from the last 30 days
 
-
                            Below are the new updates made as of 2/12\n
                            NEW COMMANDS: \n
                            - "plexrecent": Returns list of movies added based on the days requested. Returns audience rating and date added.
-                           - "chatgpt": Fixed issue with the response being cut short   
+                           - "chatgpt": Fixed issue with the response being cut short
+                           
+                           Below are the new updates made as of 2/20\n
+                           NEW COMMANDS: \n
+                           - "genimage": Returns AI generated art
                            `
 
           await interaction.reply({ embeds: [createdEmbed('ffffff', `New Updates!`, explain)], ephemeral: false })
