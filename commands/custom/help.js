@@ -23,7 +23,8 @@ module.exports = {
 
                            Below are the new updates made as of 2/12\n
                            NEW COMMANDS: \n
-                           - "plexrecent": Returns list of movies added based on the days requested. Returns audience rating and date added.   
+                           - "plexrecent": Returns list of movies added based on the days requested. Returns audience rating and date added.
+                           - "chatgpt": Fixed issue with the response being cut short   
                            `
 
           await interaction.reply({ embeds: [createdEmbed('ffffff', `New Updates!`, explain)], ephemeral: false })
