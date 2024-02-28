@@ -18,6 +18,11 @@ function getFormattedDatetime() {
     return value
 }
 
+function getFormattedDate() {
+    value =  DateTime.fromJSDate(new Date()).setZone('America/Chicago').toFormat('yyyy-MM-dd');
+    return value
+}
+
 function formatDatetime(datetime) {
     return DateTime.fromMillis(datetime).toFormat('yyyy/MM/dd HH:mm:ss')
 } 
@@ -58,4 +63,4 @@ function randomReply() {
     return responses[randomIndex]
 }
 
-module.exports = { createdEmbed, randomReply, formatCSTTime, getFormattedDatetime, formatDatetime, formatDate, executeQuery }
+module.exports = { getFormattedDate, createdEmbed, randomReply, formatCSTTime, getFormattedDatetime, formatDatetime, formatDate, executeQuery }
