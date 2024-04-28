@@ -12,7 +12,8 @@ module.exports = {
   async execute(interaction) {
       if (interaction.user.id == '553337834090659899') {
 
-          await interaction.deferReply();
+          //await interaction.deferReply();
+          await interaction.reply({ embeds: [createdEmbed('FF0000', 'Loading Data', '')], ephemeral: false });
 
           try {
               const startRunTime = new Date();
@@ -85,7 +86,7 @@ module.exports = {
                       }
                   }
 
-                  const messageQuery = 'INSERT INTO message (message_id, content_txt, guild_id, channel_id, created_dtm, author_id, og_content_txt) VALUES ?';
+                  const messageQuery = 'INSERT INTO message_stg (message_id, content_txt, guild_id, channel_id, created_dtm, author_id, og_content_txt) VALUES ?';
                   const messageValues = messageList.map((m) => [m.messageId, m.content, m.guildId, m.channelId, m.createdTimestamp, m.authorId, m.content]);
 
                   pool.query(messageQuery, [messageValues])
@@ -96,7 +97,7 @@ module.exports = {
                           console.error('Error inserting values:', err);
                       })
 
-                  const reactionQuery = 'INSERT INTO reaction (message_id, user_id, emoji_txt, emoji_id, channel_id, guild_id, added_dtm) VALUES ?';
+                  const reactionQuery = 'INSERT INTO reaction_stg (message_id, user_id, emoji_txt, emoji_id, channel_id, guild_id, added_dtm) VALUES ?';
                   const reactionValues = reactionList.map((r) => [r.messageId, r.users, r.emoji, r.id, r.channelId, r.guildId, r.addedTime]);
 
                   pool.query(reactionQuery, [reactionValues])
@@ -115,10 +116,11 @@ module.exports = {
 
                   const loadTime = ((endTimeMinutes - startTimeMinutes) / 1000) / 60
 
-                  await interaction.followUp({
-                      embeds: [createdEmbed('5beb34', `Emojis and Messages are up to date now`, `The load time took ${loadTime.toFixed(2)} minutes`)],
-                      ephemeral: false
-                  })
+                  //await interaction.followUp({
+                   //   embeds: [createdEmbed('5beb34', `Emojis and Messages are up to date now`, `The load time took ${loadTime.toFixed(2)} minutes`)],
+                    //  ephemeral: false
+                 // })
+                 console.log(loadTime)
 
               } catch (error) {
                   console.error('Error fetching data:', error);
